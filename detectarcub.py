@@ -1,10 +1,10 @@
 from ultralytics import YOLO
 import cv2
 
-model = YOLO("yolov8n.pt")
+model = YOLO("cubos1.pt")
 
 # Leer una imagen de prueba 
-img = cv2.imread("imagenprueba.jpg")
+img = cv2.imread("C:\\Users\\yesen\\OneDrive\\Escritorio\\BENJA UNIVERSIDAD\\ARCHIVOS 2025\\WRO carrito\\cubos.jpg")
 
 results = model(img)
 
@@ -22,7 +22,7 @@ for r in results:
         cv2.circle(img, (cx, cy), 50, (0, 255, 0), -1)
 
         # Escribir el nombre
-        cv2.putText(img, class_name, (cx + 15, cy), cv2.FONT_HERSHEY_SIMPLEX, 10, (255, 0, 0), 2)
+        cv2.putText(img, class_name, (cx + 15, cy), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 0, 0), 2)
 img = cv2.resize(img, (800, 600))
 cv2.imshow("Resultado", img)
 cv2.waitKey(0)

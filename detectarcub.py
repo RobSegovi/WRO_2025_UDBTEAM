@@ -19,10 +19,10 @@ for r in results:
         print(f"{class_name}: x={cx}, y={cy}")
         
         # Dibujar círculo
-        cv2.circle(img, (cx, cy), 50, (0, 255, 0), -1)
+        cv2.circle(img, (cx, cy), 15, (0, 255, 0), -1)
 
         # Escribir el nombre
-        cv2.putText(img, class_name, (cx + 15, cy), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 0, 0), 2)
+        cv2.putText(img, class_name, (cx + 15, cy), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
 img = cv2.resize(img, (800, 600))
 cv2.imshow("Resultado", img)
 cv2.waitKey(0)

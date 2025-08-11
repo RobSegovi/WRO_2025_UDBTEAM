@@ -2,11 +2,16 @@
 # pylint: disable=no-member
 from ultralytics import YOLO
 import cv2
+import serial
+import time
+
+arduino = serial.Serial(port='COM3', baudrate=9600, timeout=1)
+time.sleep(2)
 
 model = YOLO("cubos1.pt")
 
 # Leer una imagen de prueba
-img = cv2.imread("cubov.jpg")
+img = cv2.imread("cubos2.jpg")
 
 #if img is None:
     #print("Error: No se pudo leer la imagen. Revisa el nombre, la ruta o que esté descargada localmente.")
@@ -57,6 +62,9 @@ else:
     mensaje = f"{indicador},{x},{y}\n"
 
 print(mensaje)
+
+arduino.write(mensaje.encode())
+
 img = cv2.resize(img, (800, 600))
 cv2.imshow("Resultado", img)
 cv2.waitKey(0)

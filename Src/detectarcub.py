@@ -1,16 +1,17 @@
 # Detectar y clasificar objetos en tiempo real
 # pylint: disable=no-member
+import time
 from ultralytics import YOLO
 import cv2
 import serial
-import time
+import numpy as np
 
 # Configurar Arduino
-#arduino = serial.Serial(port='COM3', baudrate=9600, timeout=1)
-#time.sleep(2)
+arduino = serial.Serial(port='COM4', baudrate=9600, timeout=1)
+time.sleep(2)
 
 # Cargar modelo YOLO
-model = YOLO("cubos1.pt")
+model = YOLO(r"c:\Users\yesen\OneDrive\Escritorio\BENJA UNIVERSIDAD\ARCHIVOS 2025\WRO carrito\Others\cubos1.pt")
 
 # Abrir la camara
 cap = cv2.VideoCapture(0)
@@ -28,6 +29,14 @@ while True:
     # Solo analizar cada 2 frames
     if conteo % 2 ==0:
         results = model(frame)
+
+    # Convertir a grises
+    gris = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    # Seleccionar una ROI
+    h, b = gris.shape
+    roi = gris[int(h*0.3):int(h*0.7), 0:b] 
+    # Calcular brillo
+    brillo = np.mean(roi)
 
     maxArea = 0
     objCercano = ""
@@ -55,13 +64,13 @@ while True:
                 y = cy
 
             # Dibujar circulo
-            cv2.circle(frame, (cx, cy), 15, (0, 255, 0), -1)
+            #cv2.circle(frame, (cx, cy), 15, (0, 255, 0), -1)
             # Escribir nombre
-            cv2.putText(frame, class_name, (cx + 15, cy), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+            #cv2.putText(frame, class_name, (cx + 15, cy), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
 
     # Preparar mensaje para Arduino
     if contador == 0:
-        mensaje = "0,No,No\n"
+        indicador = "0"
     else:
         if objCercano == "Cubo verde":
             indicador = "1"
@@ -69,10 +78,13 @@ while True:
             indicador = "2"
         else:
             indicador = "0"
-        mensaje = f"{indicador},{x},{y}\n"
+    if contador == 0 and brillo < 80:
+        indicador = "3"
 
+    mensaje = f"{indicador},{x},{maxArea}\n"
+    #print(brillo)
     print(mensaje)
-    #arduino.write(mensaje.encode())  
+    arduino.write(mensaje.encode())  
 
     # Mostrar video en ventana
     cv2.imshow("Resultado", frame)

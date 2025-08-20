@@ -5,6 +5,7 @@ from ultralytics import YOLO
 import cv2
 import serial
 import numpy as np
+from detectarcolores import lineas
 
 # Configurar Arduino
 arduino = serial.Serial(port='COM4', baudrate=9600, timeout=1)
@@ -43,6 +44,10 @@ while True:
     x = 0
     y = 0
     contador = 0
+    linea = 0
+
+    # Color de la linea
+    linea = lineas(frame)
 
     # Procesar detecciones
     for r in results:
@@ -64,9 +69,11 @@ while True:
                 y = cy
 
             # Dibujar circulo
-            #cv2.circle(frame, (cx, cy), 15, (0, 255, 0), -1)
+            # cv2.circle(frame, (cx, cy), 15, (0, 255, 0), -1)
             # Escribir nombre
-            #cv2.putText(frame, class_name, (cx + 15, cy), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+            # cv2.putText(frame, class_name, (cx + 15, cy), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+            # Dibujar rectangulo
+            # cv2.rectangle(frame, (100, h-50), (b-100, h-30), (0, 255, 0), 2)
 
     # Preparar mensaje para Arduino
     if contador == 0:
@@ -76,10 +83,14 @@ while True:
             indicador = "1"
         elif objCercano == "Cubo rojo":
             indicador = "2"
+        elif linea == 3:
+            indicador = "3"
+        elif linea == 4:
+            indicador = "4"
         else:
             indicador = "0"
-    if contador == 0 and brillo < 80:
-        indicador = "3"
+    #if contador == 0 and brillo < 80:
+        #indicador = "3"
 
     mensaje = f"{indicador},{x},{maxArea}\n"
     #print(brillo)

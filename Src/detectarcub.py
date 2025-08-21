@@ -8,8 +8,8 @@ import numpy as np
 from detectarcolores import lineas
 
 # Configurar Arduino
-arduino = serial.Serial(port='COM4', baudrate=9600, timeout=1)
-time.sleep(2)
+#arduino = serial.Serial(port='COM4', baudrate=9600, timeout=1)
+#time.sleep(2)
 
 # Cargar modelo YOLO
 model = YOLO(r"c:\Users\yesen\OneDrive\Escritorio\BENJA UNIVERSIDAD\ARCHIVOS 2025\WRO carrito\Others\cubos1.pt")
@@ -49,6 +49,8 @@ while True:
     # Color de la linea
     linea = lineas(frame)
 
+    cv2.rectangle(frame, (100, h-50), (b-100, h-30), (0, 255, 0), 2)
+
     # Procesar detecciones
     for r in results:
         for box in r.boxes:
@@ -73,7 +75,6 @@ while True:
             # Escribir nombre
             # cv2.putText(frame, class_name, (cx + 15, cy), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
             # Dibujar rectangulo
-            # cv2.rectangle(frame, (100, h-50), (b-100, h-30), (0, 255, 0), 2)
 
     # Preparar mensaje para Arduino
     if contador == 0:
@@ -83,19 +84,20 @@ while True:
             indicador = "1"
         elif objCercano == "Cubo rojo":
             indicador = "2"
-        elif linea == 3:
-            indicador = "3"
-        elif linea == 4:
-            indicador = "4"
         else:
             indicador = "0"
     #if contador == 0 and brillo < 80:
         #indicador = "3"
+    if linea == 3:
+        indicador = "3"
+    elif linea == 4:
+        indicador = "4"
 
     mensaje = f"{indicador},{x},{maxArea}\n"
     #print(brillo)
+    #print(linea)
     print(mensaje)
-    arduino.write(mensaje.encode())  
+    #arduino.write(mensaje.encode())  
 
     # Mostrar video en ventana
     cv2.imshow("Resultado", frame)

@@ -12,7 +12,7 @@ def lineas(frame):
     upper_azul = np.array([130, 255, 255])
 
     # --- ROI: rectángulo en la parte baja ---
-    h, b= frame.shape
+    h, b, _ = frame.shape
     roi = frame[h-50:h-30, 100:b-100]  # zona baja centrada
     hsv_roi = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
 

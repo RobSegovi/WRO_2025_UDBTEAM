@@ -19,6 +19,7 @@ cap = cv2.VideoCapture(0)
 cap.set(3, 320)  # ancho
 cap.set(4, 240)  # alto
 
+n = 0
 results = []
 conteo=0
 while True:
@@ -88,11 +89,12 @@ while True:
             indicador = "0"
     #if contador == 0 and brillo < 80:
         #indicador = "3"
-    if linea == 3:
+    if linea == 3 and n == 0 or linea == 3 and n == 1:
         indicador = "3"
-    elif linea == 4:
+        n=1
+    elif linea == 4 and n == 0 or linea == 4 and n == 2:
         indicador = "4"
-
+        n=2
     mensaje = f"{indicador},{x},{maxArea}\n"
     #print(brillo)
     #print(linea)

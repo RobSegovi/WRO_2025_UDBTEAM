@@ -11,9 +11,9 @@ def lineas(frame):
     lower_azul = np.array([100, 100, 100])
     upper_azul = np.array([130, 255, 255])
 
-    # --- ROI: rectángulo en la parte baja ---
+    # Seleccionar ROI en la parte baja
     h, b, _ = frame.shape
-    roi = frame[h-50:h-30, 100:b-100]  # zona baja centrada
+    roi = frame[h-40:h-20, 100:b-100]  
     hsv_roi = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
 
     mask_naranja_roi = cv2.inRange(hsv_roi, lower_naranja, upper_naranja)
@@ -24,7 +24,7 @@ def lineas(frame):
     azul_pixels = cv2.countNonZero(mask_azul_roi)
 
     # Retornar la linea detectada
-    if naranja_pixels > 200:  # umbral ajustable
+    if naranja_pixels > 200: 
         return 3
     elif azul_pixels > 200:
         return 4

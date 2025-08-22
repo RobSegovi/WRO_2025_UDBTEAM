@@ -6,6 +6,7 @@ import cv2
 import serial
 import numpy as np
 from detectarcolores import lineas
+from detectarpared import pared
 
 # Configurar Arduino
 #arduino = serial.Serial(port='COM4', baudrate=9600, timeout=1)
@@ -29,28 +30,26 @@ while True:
         break
     conteo += 1
     # Solo analizar cada 2 frames
-    if conteo % 2 ==0:
+    if conteo % 2 == 0:
         results = model(frame)
 
-    # Convertir a grises
-    gris = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    # Seleccionar una ROI
-    h, b = gris.shape
-    roi = gris[int(h*0.3):int(h*0.7), 0:b] 
-    # Calcular brillo
-    brillo = np.mean(roi)
-
+    h, b, _ = frame.shape
     maxArea = 0
     objCercano = ""
     x = 0
     y = 0
     contador = 0
     linea = 0
+    p = 0
 
     # Color de la linea
     linea = lineas(frame)
 
-    cv2.rectangle(frame, (100, h-50), (b-100, h-30), (0, 255, 0), 2)
+    # Detectar pared
+    p = pared(frame)
+
+    #cv2.rectangle(frame, (100, h-40), (b-100, h-20), (0, 255, 0), 2)
+    #cv2.rectangle(frame, (b//3, h-90), (2*b//3, h-75), (0, 255, 0), 2)
 
     # Procesar detecciones
     for r in results:
@@ -70,7 +69,6 @@ while True:
                 objCercano = class_name
                 x = cx
                 y = cy
-
             # Dibujar circulo
             # cv2.circle(frame, (cx, cy), 15, (0, 255, 0), -1)
             # Escribir nombre
@@ -87,16 +85,19 @@ while True:
             indicador = "2"
         else:
             indicador = "0"
-    #if contador == 0 and brillo < 80:
-        #indicador = "3"
+    
+    if p == 5:
+        indicador = "5"
+
     if linea == 3 and n == 0 or linea == 3 and n == 1:
         indicador = "3"
         n=1
     elif linea == 4 and n == 0 or linea == 4 and n == 2:
         indicador = "4"
         n=2
+    
     mensaje = f"{indicador},{x},{maxArea}\n"
-    #print(brillo)
+
     #print(linea)
     print(mensaje)
     #arduino.write(mensaje.encode())  

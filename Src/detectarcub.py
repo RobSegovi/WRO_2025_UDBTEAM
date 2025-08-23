@@ -9,8 +9,8 @@ from detectarcolores import lineas
 from detectarpared import pared
 
 # Configurar Arduino
-#arduino = serial.Serial(port='COM4', baudrate=9600, timeout=1)
-#time.sleep(2)
+arduino = serial.Serial(port='/dev/ttyACM0', baudrate=9600, timeout=1)
+time.sleep(2)
 
 # Cargar modelo YOLO
 model = YOLO(r"c:\Users\yesen\OneDrive\Escritorio\BENJA UNIVERSIDAD\ARCHIVOS 2025\WRO carrito\Others\cubos1.pt")
@@ -100,7 +100,7 @@ while True:
 
     #print(linea)
     print(mensaje)
-    #arduino.write(mensaje.encode())  
+    arduino.write(mensaje.encode())
 
     # Mostrar video en ventana
     cv2.imshow("Resultado", frame)

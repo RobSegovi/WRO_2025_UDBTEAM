@@ -8,12 +8,34 @@ import numpy as np
 from detectarcolores import lineas
 from detectarpared import pared
 
-# Configurar Arduino
-arduino = serial.Serial(port='/dev/ttyACM0', baudrate=9600, timeout=1)
-time.sleep(2)
+# Configurar Arduino y el puerto
+def abrir_puerto():
+    while True:
+        try:
+            s = serial.Serial(
+                port='/dev/ttyACM0',
+                baudrate=9600,
+                timeout=1,
+                rtscts=False,
+                dsrdtr=False
+            )
+            # evitar reset
+            s.dtr = False
+            s.rts = False
+            time.sleep(2)  # darle tiempo al arduino
+            s.reset_input_buffer()
+            s.reset_output_buffer()
+            print("? Puerto serie abierto correctamente")
+            return s
+        except serial.SerialException as e:
+            print("No pude abrir el puerto, reintentando:", e)
+            time.sleep(1)
+            
+# abrir puerto
+arduino = abrir_puerto()
 
 # Cargar modelo YOLO
-model = YOLO(r"c:\Users\yesen\OneDrive\Escritorio\BENJA UNIVERSIDAD\ARCHIVOS 2025\WRO carrito\Others\cubos1.pt")
+model = YOLO("cubos1.pt")
 
 # Abrir la camara
 cap = cv2.VideoCapture(0)
@@ -48,8 +70,8 @@ while True:
     # Detectar pared
     p = pared(frame)
 
-    #cv2.rectangle(frame, (100, h-40), (b-100, h-20), (0, 255, 0), 2)
-    #cv2.rectangle(frame, (b//3, h-90), (2*b//3, h-75), (0, 255, 0), 2)
+    cv2.rectangle(frame, (100, h-40), (b-100, h-20), (0, 255, 0), 2)
+    cv2.rectangle(frame, (b//3, h-90), (2*b//3, h-75), (0, 255, 0), 2)
 
     # Procesar detecciones
     for r in results:
@@ -100,15 +122,26 @@ while True:
 
     #print(linea)
     print(mensaje)
-    arduino.write(mensaje.encode())
-
+    
+    # enviar mensaje al arduino
+    try:
+        arduino.write(mensaje.encode())
+    except serial.SerialException as e:
+        print("?? Error de escritura, reabriendo puerto:", e)
+        try:
+            arduino.close()
+        except:
+            pass
+        time.sleep(0.5)
+        arduino = abrir_puerto()
+    
     # Mostrar video en ventana
     cv2.imshow("Resultado", frame)
-
-    # Salir con tecla q
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-# Liberar recursos
 cap.release()
 cv2.destroyAllWindows()
+if arduino.is_open:
+    arduino.close()
+    print("? se cerro el puerto")

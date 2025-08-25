@@ -39,14 +39,27 @@ void setup()
   }
 
   Serial.begin(9600);
+  digitalWrite(M1, LOW);
+  digitalWrite(M2, LOW);
 
 }
 void loop()
 {
+  //origen real 0
+  //origen con giro izquierda previo 1
+  //origen con giro derecha previo 2
   lectura();
   if(indicador == 0)//no ve nada, entonces avanza.
   {
-    origen(0);
+    if(guardar == 3)//girar a la derecha
+    {
+      origen(2);
+    }
+    else if(guardar == 4)//girar a la izquierda
+    {
+      origen(1);
+    }
+    else origen(0);
     avanzar(255);
   }
   else if(indicador == 3)//color naranja, entonces girar a la derecha.
@@ -101,12 +114,12 @@ void detener()
 
 void izquierda(int i)
 {
-  if(i == 1) theta=85;
-  else if(i == 2) theta=85;
+  if(i == 1) theta=90;
+  else if(i == 2) theta=90;
 
   for(int hz = 0; hz <= 50; hz++)
   {
-    Serial.println(theta);
+    //Serial.println(theta);
     y = ((theta*2000.0)/180.0) + 500;
     digitalWrite(pinServo, HIGH);
     delayMicroseconds(y);
@@ -117,12 +130,12 @@ void izquierda(int i)
 
 void derecha(int j)
 {
-  if(j == 1) theta=59;
-  else if(j == 2) theta=59;
+  if(j == 1) theta=54;
+  else if(j == 2) theta=54;
 
   for(int hz = 0; hz <= 50; hz++)
   {
-    Serial.println(theta);
+    //Serial.println(theta);
     y = ((theta*2000.0)/180.0) + 500;
     digitalWrite(pinServo, HIGH);
     delayMicroseconds(y);
@@ -134,12 +147,12 @@ void derecha(int j)
 void origen(int k)
 {
   if(k == 0)theta=72; //origen real.
-  else if(k == 1)theta=72; //origen izquierda.
-  //else if(k == 2)theta=80; //origen derecha.
+  else if(k == 1)theta=70; //origen izquierda.
+  else if(k == 2)theta=75; //origen derecha.
   
   for(int hz = 0; hz <= 50; hz++)
   {
-    Serial.println(theta);
+    //Serial.println(theta);
     y = ((theta*2000.0)/180.0) + 500;
     digitalWrite(pinServo, HIGH);
     delayMicroseconds(y);

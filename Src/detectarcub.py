@@ -70,7 +70,7 @@ while True:
     # Detectar pared
     p = pared(frame)
 
-    cv2.rectangle(frame, (100, h-40), (b-100, h-20), (0, 255, 0), 2)
+    cv2.rectangle(frame, (140, h-40), (180, h-20), (0, 255, 0), 2)
     cv2.rectangle(frame, (b//3, h-90), (2*b//3, h-75), (0, 255, 0), 2)
 
     # Procesar detecciones

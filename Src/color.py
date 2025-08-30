@@ -8,11 +8,8 @@ def lineas(frame,n):
     lower_naranja = np.array([5, 100, 100])
     upper_naranja = np.array([15, 255, 255])
 
-    #lower_azul = np.array([90, 90, 50])
-    #upper_azul = np.array([125, 255, 255])
-
     # Azul
-    lower_azul = np.array([80, 60, 60])
+    lower_azul = np.array([80, 40, 60])
     upper_azul = np.array([140, 255, 255])
 
     # Seleccionar ROI en la parte baja
@@ -20,10 +17,20 @@ def lineas(frame,n):
     # cv2.rectangle(frame, (140, h-40), (180, h-20), (0, 255, 0), 2)
     
     #roi = frame[80:100, 140:180]
-    roi = frame[h-75:h-60, 126:193]
+    roi = frame[h-75:h-45, 126:193]
+    roip = frame[h-75:h-45, 126:193]
+    
+    # Convertir a grises
+    gris = cv2.cvtColor(roip, cv2.COLOR_BGR2GRAY)
+    # Binarizar para detectar blanco o negro
+    _, bin = cv2.threshold(gris, 100, 255, cv2.THRESH_BINARY)
+    # Contar pixeles blancos y negros
+    blanco_pixels = cv2.countNonZero(bin)
+    total_pixels = bin.size
+    negro_pixels = total_pixels - blanco_pixels
     
     hsv_roi = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
-    
+ 
     mask_naranja_roi = cv2.inRange(hsv_roi, lower_naranja, upper_naranja)
     mask_azul_roi = cv2.inRange(hsv_roi, lower_azul, upper_azul)
 
@@ -34,13 +41,14 @@ def lineas(frame,n):
     #solo pruebas comentar luego
     #cv2.imshow("ROI", roi)
     #cv2.imshow("Mascara Naranja", mask_naranja_roi)
-    #cv2.imshow("Mascara Azul", mask_azul_roi)
+    cv2.imshow("Mascara Azul", mask_azul_roi)
     #fin de codigo prueba
     
+    print(f"PNEG: {negro_pixels}")
     # Retornar la linea detectada
     if naranja_pixels > 50:
         linea = 3
-    elif azul_pixels > 35:
+    elif azul_pixels > 35 and negro_pixels < azul_pixels:
         linea = 4
     else:
         return 0, naranja_pixels, azul_pixels

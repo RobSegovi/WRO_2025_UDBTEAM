@@ -1,11 +1,12 @@
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
+//retroceso cuadno va a la izquierda es mucho y retroceso cuando va a derecha es muy poco 
 //volataje og 6.70
 //act 6.50
 int pinServo = 10;
 float y;
 int theta = 0;
-
+int imp=0;
 LiquidCrystal_I2C lcd(0x27,16,2); 
 
 // Definir un carácter personalizado (ejemplo: carita feliz)
@@ -39,16 +40,18 @@ int PWM = 2;
 long tiempo = 3000;
 long tiempoactual = 0;
 int numdelay = 72;
+int numdelayexiz = 30;
+int numdelayexde = 40 ;
 int retrodelay = 800;
 int delaygiz = 2200;
 int delaygde = 2200;
 // ---Varaibles de velocidad 
 int vcorriz = 225;
 int vcorrde =225;
-int vgiriz = 255;
-int vgirde = 255;
+int vgiriz = 245;
+int vgirde = 245;
 int vretro = 255;
-int vavan =  210;
+int vavan =  200;
 // --- Variables de comunicación ---
 String inputString = "";
 bool stringComplete = false;
@@ -59,7 +62,13 @@ long posX = 0;        // coordenada eje X
 long area = 0;        // área del objeto
 int guardar = 0;      //guardar indicador
 int color = 0;
-
+// --- milis const ---
+unsigned long  tanterior = 0;
+unsigned long esperadecor = 500;
+unsigned long esperadecorder = 620;
+unsigned long tinicio = 0;
+bool prim = true;
+bool corregir = false;
 void setup() 
 {
   origen(0);
@@ -85,29 +94,45 @@ void loop()
 
   lectura();
   //avanzar 
-  inicio:
+  
+  inicio: 
+  if(posX==1) {
+    color=1;
+    lcd.setCursor(10,1);
+    lcd.print("     ");
+    lcd.setCursor(10,1);
+    lcd.print("c:azul");
+  }
+  else if (posX==2){
+    color=2;
+        lcd.setCursor(10,1);
+    lcd.print("     ");
+    lcd.setCursor(10,1);
+    lcd.print("c:naran");
+  }
+
   if(indicador == 1)
   {
     pantalla(1);
     if (guardar == 2) // anterioriormente corriegio a la derecha
     {
-      izquierda(75, vcorriz, 10);//(angulo,velocidad,delay)
+      /*/izquierda(75, vcorriz, 10);//(angulo,velocidad,delay)
       for (int i=0 ; i<=numdelay; i++)
       {
        lectura();
        if(indicador== 4 || indicador == 5) goto inicio;
        delay(10);
-      }
+      }/*/
     }
     else if (guardar == 3)//anteriormente corrigio a la izquierda
     {
-      derecha(50, vcorrde, 10);//(angulo,velocidad,delay)
+     /*/ derecha(50, vcorrde, 10);//(angulo,velocidad,delay)
       for (int i=0 ; i<=numdelay; i++)
       {
        lectura();
        if(indicador== 4 || indicador == 5) goto inicio;
        delay(10);
-      }
+      }/*/
     }
     else if(guardar == 5 )//girar a la derecha
     {
@@ -118,20 +143,81 @@ void loop()
       origen(1);
     }
     else origen(0);
+    if(imp==0)
+    {
+      avanzar(245);
+      delay(100);
+      imp =1;
+    }else
+    {
     avanzar(vavan);
     guardar = indicador;
+    }
+    
+    
   }
   else if(indicador == 2)//corregir a la derecha
   {
+    unsigned long tactual = millis();  
+    if(prim == true)
+    {
+      tinicio =  millis();
+      prim = false;
+    }
+    if((tactual - tinicio) >= esperadecorder)
+    {
+      izquierda(75, vcorriz, 10);//(angulo,velocidad,delay)
+      for (int i=0 ; i<=numdelayexde; i++)
+      {
+       lectura();
+       if(indicador !=2)
+        {
+         prim =true;
+         goto inicio;
+        }
+       delay(10);
+      }
+
+
+      prim =true;
+      
+      
+    }
     pantalla(5);
-    derecha(50, vcorrde, 0);//(angulo,velocidad,delay)
+    derecha(40, vcorrde, 0);//(angulo,velocidad,delay)
     guardar = indicador;
   }
   else if(indicador == 3)//correcion izquierda
   {
+   
+    unsigned long tactual = millis();  
+    if(prim == true)
+    {
+      tinicio =  millis();
+      prim = false;
+    }
+    if(tactual-tinicio >= esperadecor)
+    {
+      derecha(50, vcorriz, 300);//(angulo,velocidad,delay)
+      for (int i=0 ; i<=numdelayexiz; i++)
+      {
+       lectura();
+       if(indicador !=3)
+        {
+         prim =true;
+         goto inicio;
+        }
+       delay(10);
+      }
+
+      prim =true;
+      
+      
+    }
     pantalla(6);
-    izquierda(75, vcorriz, 0);//(angulo,velocidad,delay)
+    izquierda(71, vcorriz, 0);//(angulo,velocidad,delay)
     guardar = indicador;
+
   }
   //girar  a la izquierda
   else if(indicador == 4)//color azul
@@ -140,6 +226,10 @@ void loop()
     izquierda(90, vgiriz, delaygiz);//(angulo,velocidad,delay)
     guardar = indicador;
     color = 1;
+    lcd.setCursor(10,1);
+    lcd.print("     ");
+    lcd.setCursor(10,1);
+    lcd.print("c:azul");
     
   }
   //girar a la derecha derecha
@@ -149,6 +239,10 @@ void loop()
     derecha(40, vgirde, delaygde);//(angulo,velocidad,delay)
     guardar = indicador;
     color = 2;
+    lcd.setCursor(10,1);
+    lcd.print("     ");
+    lcd.setCursor(10,1);
+    lcd.print("c:naran");
   }
    else if(indicador == 6)//pared, entonces retroceder y girar
   {
@@ -216,7 +310,7 @@ void derecha(int ang, int vel, int re)
 void origen(int k)
 {
   if(k == 0) theta=66; //origen real.
-  else if(k == 1) theta=75; //origen izquierda. viene de la izquierda
+  else if(k == 1) theta=68; //origen izquierda. viene de la izquierda
   else if(k == 2) theta=70; //origen derecha. viende de la izquierda
   Servo(theta);
 
@@ -320,13 +414,13 @@ void lectura()
       area = areaStr.toInt();
       //delay(20);
       String LCDP0 = "i:" + String(indicador);
-      String LCDP1= "X:" + String(posX);
+
+      
+
       lcd.setCursor(10,0);
       lcd.print(LCDP0);
-      lcd.setCursor(10,1);
-      lcd.print("     ");
-      lcd.setCursor(10,1);
-      lcd.print(LCDP1);
+      
+     
     }
     inputString = ""; // limpiar para el siguiente mensaje
   }

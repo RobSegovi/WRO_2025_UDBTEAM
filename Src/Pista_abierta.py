@@ -10,7 +10,7 @@ from pared import pared
 from roi import interior
 
 # Configurar Arduino y el puerto
-""""
+
 def abrir_puerto():
     while True:
         try:
@@ -35,9 +35,9 @@ def abrir_puerto():
             
 # abrir puerto
 arduino = abrir_puerto()
- """
+ 
 # Cargar modelo YOLO
-model = YOLO("C:\\Users\\yesen\\OneDrive\\Escritorio\\BENJA UNIVERSIDAD\\ARCHIVOS 2025\\WRO carrito\\Others\\cubos1.pt")
+model = YOLO("cubos1.pt")
 
 # Abrir la camara
 cap = cv2.VideoCapture(0)
@@ -49,6 +49,9 @@ results = []
 conteo=0
 giro = 0
 lado = 0
+time.sleep(3)
+prim = 0
+x = 0
 
 while True:
     ret, frame = cap.read()
@@ -63,19 +66,20 @@ while True:
     h, b, _ = frame.shape
     maxArea = 0
     objCercano = ""
-    x = 0
+    #x = 0
     y = 0
     contador = 0
     linea = 0
     p = 0
     
     indicador = 0
+    
 
     # Color de la linea
     linea, pixnaranja, pixazul = lineas(frame,  n)
 
     # Detectar pared
-    p = pared(frame)
+    p = pared(frame,lado)
     
     a = interior(frame,linea,giro,lado)
     if a == 4:
@@ -84,54 +88,17 @@ while True:
         giro = 0
     elif a == 13:
         lado = 1 # Lado derecho
+        x=2
     elif a == 14:
         lado = 2 # Lado izquierdo
+        x=1
 
                                               #h-75
     cv2.rectangle(frame, (b//3, h-90), (2*b//3, h), (0, 255, 0), 2) #rectangulo detecta pared
-    cv2.rectangle(frame, (126, h-75), (193, h-60), (0, 255, 0), 2) #rectangulo detecta lineas 
-
-    # Procesar detecciones
-    """
-    for r in results:
-        for box in r.boxes:
-            contador += 1
-            x1, y1, x2, y2 = box.xyxy[0]
-            cx = int((x1 + x2) / 2)
-            cy = int((y1 + y2) / 2)
-            area = (x2 - x1) * (y2 - y1)
-            class_id = int(box.cls[0])
-            class_name = model.names[class_id]
-
-            #print(f"{class_name}: x={cx}, y={cy}, Area={area}")
-
-            if area > maxArea:
-                maxArea = area
-                objCercano = class_name
-                x = cx
-                y = cy
-            # Dibujar circulo
-            # cv2.circle(frame, (cx, cy), 15, (0, 255, 0), -1)
-            # Escribir nombre
-            # cv2.putText(frame, class_name, (cx + 15, cy), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
-            # Dibujar rectangulo
-            """
+    cv2.rectangle(frame, (126, h-75), (193, h-45), (0, 255, 0), 2) #rectangulo detecta lineas 
 
     # Preparar mensaje para Arduino
-    """
-    if contador == 0:
-        indicador = "0"
-    else:
-        if objCercano == "Cubo verde":
-            indicador = "1"
-        elif objCercano == "Cubo rojo":
-            indicador = "2"
-        else:
-            indicador = "0"
-            """
-    
-    #if p == 5:
-        #indicador = "5"
+ 
     if lado == 0:
         indicador = "1" #AVANZAR
     elif a == 1:
@@ -142,6 +109,10 @@ while True:
         indicador = "3" #CORREGIR A LA IZQUIERDA
     elif a == 4:
         indicador = "1" #AVANZAR
+        if lado == 2:
+            x = 1
+        if lado == 1:
+            x = 2
     elif a == 5:
         indicador = "1" #AVANZAR
     elif a == 6:
@@ -151,8 +122,8 @@ while True:
                 arduino.write(mensaje.encode())
                 print("4444")
                 time.sleep(0.1)
-
-    elif a == 7: #TODAVIA PENDIENTE
+        
+    elif a == 7:  
         indicador = "5" #GIRO A LA DERECHA CON DELAY
         mensaje = f"{indicador},{x},{maxArea}\n"
         for _ in range(10):
@@ -168,7 +139,7 @@ while True:
     #impresion de valores en cmdp
     print(f"{mensaje} n:{n} linea:{linea} pN:{pixnaranja} pB:{pixazul} a:{a}")
     
-    """
+    
     # enviar mensaje al arduino
     try:
         arduino.write(mensaje.encode())
@@ -180,7 +151,7 @@ while True:
             pass
         time.sleep(0.5)
         arduino = abrir_puerto()
-        """
+        
         
     # Mostrar video en ventana
     cv2.imshow("Resultado", frame)
@@ -190,8 +161,7 @@ while True:
 cap.release()
 cv2.destroyAllWindows()
 
-""""
+
 if arduino.is_open:
     arduino.close()
     print("? se cerro el puerto")
-    """
